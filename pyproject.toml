@@ -1,0 +1,18 @@
+[project]
+name = "vdeg"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "kornia>=0.8.1",
+    "lpips>=0.1.4",
+    "onnx>=1.19.0",
+    "onnxscript>=0.5.3",
+    "tensorboard>=2.20.0",
+    "tensorboardx>=2.6.4",
+    "torch>=2.8.0",
+    "torchcodec>=0.7.0",
+    "torchmetrics>=1.8.2",
+    "torchvision>=0.23.0",
+]
