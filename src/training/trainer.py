@@ -150,6 +150,7 @@ class Trainer:
         for batch_idx, (inputs, targets) in enumerate(pbar):
             # Move to device
             # inputs: (B, T, C, H, W), targets: (B, C, H, W)
+            self.input_shape = inputs.shape[1:]
             inputs = inputs.to(self.device)
             targets = targets.to(self.device)
 
@@ -300,6 +301,8 @@ class Trainer:
             # Otherwise use a default
             if hasattr(model_to_save, "input_shape"):
                 input_shape = model_to_save.input_shape
+            elif hasattr(self, "input_shape"):
+                input_shape = tuple(self.input_shape)
             else:
                 input_shape = (1, 3, 256, 256)  # Default T, C, H, W
 

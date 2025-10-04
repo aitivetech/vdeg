@@ -85,6 +85,14 @@ class Logger:
         predictions = torch.clamp(predictions, 0.0, 1.0)
         targets = torch.clamp(targets, 0.0, 1.0)
 
+        # Upscale inputs to match predictions/targets size if needed (for super-resolution)
+        if inputs.shape != predictions.shape:
+            inputs = torch.nn.functional.interpolate(
+                inputs,
+                size=predictions.shape[2:],  # Match H, W
+                mode='nearest'
+            )
+
         # Create comparison grid
         # Stack horizontally: [input | prediction | target]
         comparison = torch.cat([inputs, predictions, targets], dim=3)  # Concatenate along width

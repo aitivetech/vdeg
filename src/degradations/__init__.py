@@ -6,6 +6,7 @@ from .compression import JPEGCompression
 from .blur import GaussianBlur, MotionBlur
 from .downscale import Downscale
 from .color import Grayscale, ReduceDynamicRange
+from .super_resolution import SuperResolutionDegradation
 
 __all__ = [
     "DegradationPipeline",
@@ -17,4 +18,5 @@ __all__ = [
     "Downscale",
     "Grayscale",
     "ReduceDynamicRange",
+    "SuperResolutionDegradation",
 ]
