@@ -33,9 +33,9 @@ EXPERIMENT_ID = "image_restoration_001"
 EXPERIMENT_DIR = "./experiments"
 
 # Dataset settings
-DATASET_PATH = "/media/bglueck/Data/datasets/laion_1024x1024_plus/images_512"
-IMAGE_SIZE = (256, 256)
-BATCH_SIZE = 2
+DATASET_PATH = "/media/bglueck/Data/datasets/laion_high/laion-output"
+IMAGE_SIZE = (512, 512)
+BATCH_SIZE = 32
 NUM_WORKERS = 4
 
 # Model settings
@@ -81,7 +81,7 @@ CHECKPOINT_INTERVAL = 5000  # Steps between checkpoints
 IMAGE_LOG_INTERVAL = 1000  # Steps between image logging (IMPORTANT: check images frequently!)
 
 # Device
-DEVICE = "cuda:1" if torch.cuda.is_available() else "cpu"
+DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
 
 
 # =============================================================================

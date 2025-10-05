@@ -25,6 +25,7 @@ class ImageRestorationDataset(Dataset):
         transform: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
         extensions: tuple[str, ...] = (".jpg", ".jpeg", ".png", ".bmp", ".webp"),
         upscale_factor: int = 1,  # For super-resolution tasks
+        limit: int | None = None,
     ) -> None:
         """
         Initialize image dataset.
@@ -53,6 +54,9 @@ class ImageRestorationDataset(Dataset):
 
         if not self.image_paths:
             raise ValueError(f"No images found in {root_dir}")
+
+        if limit is not None:
+            self.image_paths = self.image_paths[:limit]
 
         # Normalization transform
         self.normalize = T.Compose([
