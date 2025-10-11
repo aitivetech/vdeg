@@ -37,7 +37,7 @@ DATASET_PATH = "/media/bglueck/Data/datasets/laion_high/laion-output"
 IMAGE_SIZE = (256, 256)
 BATCH_SIZE = 64
 NUM_WORKERS = 4
-LIMIT = 20000  # Full dataset
+LIMIT = 50000  # Full dataset
 
 # Model settings
 MODEL_TYPE = "SimpleUNet"
