@@ -7,6 +7,7 @@ from .blur import GaussianBlur, MotionBlur
 from .downscale import Downscale
 from .color import Grayscale, ReduceDynamicRange
 from .super_resolution import SuperResolutionDegradation
+from .multitask import MultiTaskDegradation, TaskSpecificDegradation
 
 __all__ = [
     "DegradationPipeline",
@@ -19,4 +20,6 @@ __all__ = [
     "Grayscale",
     "ReduceDynamicRange",
     "SuperResolutionDegradation",
+    "MultiTaskDegradation",
+    "TaskSpecificDegradation",
 ]

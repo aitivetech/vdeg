@@ -9,6 +9,8 @@ from .colorization_v3 import ColorizationLossEnhanced
 from .colorization_antiaverage import ColorizationAntiAverageLoss
 from .colorization_weighted import ColorizationWeightedLoss
 from .gan import GANLoss, FeatureMatchingLoss, ColorizationGANLoss
+from .multitask import MultiTaskLoss, AdaptiveMultiTaskLoss
+from .multitask_gan import MultiTaskGANLoss
 
 __all__ = [
     "PerceptualLoss",
@@ -22,4 +24,7 @@ __all__ = [
     "GANLoss",
     "FeatureMatchingLoss",
     "ColorizationGANLoss",
+    "MultiTaskLoss",
+    "AdaptiveMultiTaskLoss",
+    "MultiTaskGANLoss",
 ]
