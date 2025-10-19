@@ -7,7 +7,7 @@ Combines content losses (RGB, perceptual, AB) with adversarial losses.
 import torch
 import torch.nn as nn
 
-from .multitask import MultiTaskLoss, AdaptiveMultiTaskLoss
+from .core import MultiTaskLoss
 from .gan import GANLoss
 
 
@@ -22,7 +22,7 @@ class MultiTaskGANLoss(nn.Module):
 
     def __init__(
         self,
-        content_loss: MultiTaskLoss | AdaptiveMultiTaskLoss,
+        content_loss: MultiTaskLoss,
         gan_loss: GANLoss,
         content_weight: float = 1.0,
         gan_weight: float = 0.1,

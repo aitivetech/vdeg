@@ -1,18 +1,23 @@
-"""Super-resolution degradation that actually reduces resolution."""
+"""Super-resolution degradation with bicubic upscaling."""
 
 import torch
 import torch.nn.functional as F
 
 
 class SuperResolutionDegradation:
-    """Downscale images for super-resolution training (no upscaling back)."""
+    """
+    Downscale then upscale images for super-resolution training.
 
-    def __init__(self, scale_factor: int = 2, mode: str = "bilinear") -> None:
+    Creates a low-quality upscaled input that the model must refine.
+    Input and output are the same size (matching target).
+    """
+
+    def __init__(self, scale_factor: int = 2, mode: str = "bicubic") -> None:
         """
         Initialize super-resolution degradation.
 
         Args:
-            scale_factor: Factor to downscale by (e.g., 4 = quarter resolution)
+            scale_factor: Factor to downscale and upscale by (e.g., 4 = downscale to 1/4 then upscale back)
             mode: Interpolation mode ('nearest', 'bilinear', 'bicubic')
         """
         if scale_factor < 1:
@@ -22,20 +27,20 @@ class SuperResolutionDegradation:
 
     def __call__(self, x: torch.Tensor) -> torch.Tensor:
         """
-        Apply downscaling only (for super-resolution).
+        Apply downscaling then upscaling (creates low-quality version at same size).
 
         Args:
             x: Input tensor of shape (T, C, H, W)
 
         Returns:
-            Low-resolution tensor of shape (T, C, H/scale, W/scale)
+            Low-quality upscaled tensor of shape (T, C, H, W) - same size as input
         """
         if self.scale_factor == 1:
             return x
 
         T_dim, C, H, W = x.shape
 
-        # Downscale only (don't upscale back)
+        # Downscale
         x_down = F.interpolate(
             x.reshape(T_dim * C, 1, H, W),
             scale_factor=1.0 / self.scale_factor,
@@ -43,5 +48,12 @@ class SuperResolutionDegradation:
             align_corners=False if self.mode != "nearest" else None,
         )
 
-        _, _, H_new, W_new = x_down.shape
-        return x_down.reshape(T_dim, C, H_new, W_new)
+        # Upscale back to original size (creates low-quality version)
+        x_up = F.interpolate(
+            x_down,
+            size=(H, W),
+            mode=self.mode,
+            align_corners=False if self.mode != "nearest" else None,
+        )
+
+        return x_up.reshape(T_dim, C, H, W)

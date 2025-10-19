@@ -219,7 +219,6 @@ class HATSimple(nn.Module):
         drop_path_rate: float = 0.1,
         compress_ratio: int = 3,
         squeeze_factor: int = 30,
-        upscale: int = 4,
         num_frames: int = 1,  # For compatibility with our framework
         **kwargs
     ):
@@ -227,9 +226,11 @@ class HATSimple(nn.Module):
         self.in_channels = in_channels
         self.out_channels = out_channels
         self.num_frames = num_frames
-        self.upscale = upscale
         self.num_layers = len(depths)
         self.embed_dim = embed_dim
+
+        # Store input shape for ONNX export
+        self.input_shape = (num_frames, in_channels, 256, 256)
 
         # Shallow feature extraction
         self.conv_first = nn.Conv2d(in_channels, embed_dim, 3, 1, 1)
@@ -253,13 +254,12 @@ class HATSimple(nn.Module):
 
         self.norm = nn.LayerNorm(embed_dim)
 
-        # Reconstruction
+        # Reconstruction (same-size output)
         self.conv_after_body = nn.Conv2d(embed_dim, embed_dim, 3, 1, 1)
-        self.conv_before_upsample = nn.Sequential(
+        self.conv_before_final = nn.Sequential(
             nn.Conv2d(embed_dim, embed_dim, 3, 1, 1),
             nn.LeakyReLU(inplace=True)
         )
-        self.upsample = Upsample(upscale, embed_dim)
         self.conv_last = nn.Conv2d(embed_dim, out_channels, 3, 1, 1)
 
         self.apply(self._init_weights)
@@ -298,9 +298,8 @@ class HATSimple(nn.Module):
         res = self.conv_after_body(res)
         x = x + res
 
-        # Reconstruction
-        x = self.conv_before_upsample(x)
-        x = self.upsample(x)
+        # Reconstruction (same size as input)
+        x = self.conv_before_final(x)
         x = self.conv_last(x)
 
         # Ensure output is in [0, 1] range
@@ -310,7 +309,9 @@ class HATSimple(nn.Module):
 
 
 def hat_simple_s(**kwargs):
-    """HAT-Simple Small model."""
+    """HAT-Simple Small model (same-size input/output)."""
+    # Remove upscale if provided (no longer used)
+    kwargs.pop('upscale', None)
     return HATSimple(
         embed_dim=64,
         depths=[6, 6, 6, 6],
@@ -319,7 +320,9 @@ def hat_simple_s(**kwargs):
 
 
 def hat_simple_m(**kwargs):
-    """HAT-Simple Medium model."""
+    """HAT-Simple Medium model (same-size input/output)."""
+    # Remove upscale if provided (no longer used)
+    kwargs.pop('upscale', None)
     return HATSimple(
         embed_dim=96,
         depths=[6, 6, 6, 6],
@@ -328,7 +331,9 @@ def hat_simple_m(**kwargs):
 
 
 def hat_simple_l(**kwargs):
-    """HAT-Simple Large model."""
+    """HAT-Simple Large model (same-size input/output)."""
+    # Remove upscale if provided (no longer used)
+    kwargs.pop('upscale', None)
     return HATSimple(
         embed_dim=128,
         depths=[6, 6, 6, 6, 6, 6],

@@ -1,30 +1,13 @@
-"""Loss functions for training."""
+"""Loss functions for multi-task restoration."""
 
-from .perceptual import PerceptualLoss
-from .mixed import MixedLoss
-from .colorization import ColorizationLoss
-from .colorization_fixed import ColorizationLossFixed
-from .colorization_v2 import ColorizationLossSimple
-from .colorization_v3 import ColorizationLossEnhanced
-from .colorization_antiaverage import ColorizationAntiAverageLoss
-from .colorization_weighted import ColorizationWeightedLoss
-from .gan import GANLoss, FeatureMatchingLoss, ColorizationGANLoss
-from .multitask import MultiTaskLoss, AdaptiveMultiTaskLoss
+from .core import MultiTaskLoss, PerceptualLoss
+from .gan import GANLoss, FeatureMatchingLoss
 from .multitask_gan import MultiTaskGANLoss
 
 __all__ = [
-    "PerceptualLoss",
-    "MixedLoss",
-    "ColorizationLoss",
-    "ColorizationLossFixed",
-    "ColorizationLossSimple",
-    "ColorizationLossEnhanced",
-    "ColorizationAntiAverageLoss",
-    "ColorizationWeightedLoss",
-    "GANLoss",
-    "FeatureMatchingLoss",
-    "ColorizationGANLoss",
-    "MultiTaskLoss",
-    "AdaptiveMultiTaskLoss",
-    "MultiTaskGANLoss",
+    'MultiTaskLoss',
+    'PerceptualLoss',
+    'GANLoss',
+    'FeatureMatchingLoss',
+    'MultiTaskGANLoss',
 ]

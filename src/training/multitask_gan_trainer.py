@@ -683,38 +683,53 @@ class BalancedMultiTaskGANTrainer:
 
         self.logger.log_info(f"Checkpoint saved: {checkpoint_path} (best={is_best})")
 
-        # Save generator weights only
-        gen_path = self.checkpoint_dir / f"generator_step_{self.global_step}.pt"
-        torch.save(gen_to_save.state_dict(), gen_path)
-
-        # Save EMA generator
+        # Only save EMA generator weights (better quality)
         if self.use_ema:
             self.ema.apply_shadow()
-            gen_ema_path = self.checkpoint_dir / f"generator_ema_step_{self.global_step}.pt"
-            torch.save(gen_to_save.state_dict(), gen_ema_path)
-            self.ema.restore()
+            gen_ema_name = f"generator_ema_step_{self.global_step}"
 
-        # Export to ONNX
-        try:
-            if hasattr(gen_to_save, "input_shape"):
-                input_shape = gen_to_save.input_shape
-            elif hasattr(self, "input_shape"):
-                input_shape = tuple(self.input_shape)
-            else:
-                input_shape = (1, 3, 256, 256)
+            # Prepare metadata for best checkpoint
+            metadata = {
+                "step": self.global_step,
+                "epoch": self.current_epoch,
+                "phase": self.training_phase,
+                "loss": loss,
+                "metrics": metrics,
+                "is_best": is_best,
+            }
 
-            export_path = self.export_dir / f"generator_step_{self.global_step}.onnx"
-            export_to_onnx(gen_to_save, export_path, input_shape)
+            # Save EMA generator with metadata
+            self.checkpoint_manager.save_model_only(
+                gen_to_save,
+                gen_ema_name,
+                metadata=metadata if is_best else None,
+            )
 
-            if self.use_ema:
-                self.ema.apply_shadow()
+            # Export EMA generator to ONNX
+            try:
+                if hasattr(gen_to_save, "input_shape"):
+                    input_shape = gen_to_save.input_shape
+                elif hasattr(self, "input_shape"):
+                    input_shape = tuple(self.input_shape)
+                else:
+                    input_shape = (1, 3, 256, 256)
+
                 export_path_ema = self.export_dir / f"generator_ema_step_{self.global_step}.onnx"
                 export_to_onnx(gen_to_save, export_path_ema, input_shape)
-                self.ema.restore()
 
-            self.logger.log_info(f"ONNX export saved: {export_path}")
-        except Exception as e:
-            self.logger.log_info(f"ONNX export failed: {e}")
+                # Save ONNX metadata for best checkpoint
+                if is_best:
+                    onnx_metadata = metadata.copy()
+                    onnx_metadata["onnx_path"] = str(export_path_ema)
+                    onnx_metadata["pytorch_path"] = str(self.checkpoint_dir / f"{gen_ema_name}.pt")
+                    metadata_path = self.checkpoint_dir / "best_model_info.json"
+                    self.checkpoint_manager._save_metadata(metadata_path, onnx_metadata)
+
+                self.logger.log_info(f"ONNX export saved: {export_path_ema}")
+            except Exception as e:
+                self.logger.log_info(f"ONNX export failed: {e}")
+
+            self.ema.restore()
 
     def log_experiment_info(self, **kwargs: Any) -> None:
         """Log experiment configuration."""

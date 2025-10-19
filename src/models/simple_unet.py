@@ -31,7 +31,10 @@ class SimpleUNet(nn.Module):
         super().__init__()
 
         self.num_frames = num_frames
-        self.input_shape = (num_frames, in_channels, 256, 256)  # For ONNX export
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        # Store input shape for ONNX export
+        self.input_shape = (num_frames, in_channels, 256, 256)
 
         # Calculate total input channels (T * C)
         total_in_channels = num_frames * in_channels

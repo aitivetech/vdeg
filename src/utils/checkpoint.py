@@ -1,6 +1,8 @@
 """Checkpoint management."""
 
+import json
 import shutil
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
@@ -104,20 +106,72 @@ class CheckpointManager:
 
         return checkpoint_path
 
-    def save_model_only(self, model: nn.Module, name: str) -> Path:
+    def save_model_only(
+        self,
+        model: nn.Module,
+        name: str,
+        metadata: dict[str, Any] | None = None,
+    ) -> Path:
         """
         Save only the model weights (for export).
 
         Args:
             model: Model to save
             name: Name for the saved file
+            metadata: Optional metadata to save alongside model
 
         Returns:
             Path to saved model
         """
         model_path = self.checkpoint_dir / f"{name}.pt"
         torch.save(model.state_dict(), model_path)
+
+        # Save metadata if provided
+        if metadata is not None:
+            metadata_path = self.checkpoint_dir / f"{name}_metadata.json"
+            self._save_metadata(metadata_path, metadata)
+
         return model_path
+
+    def _save_metadata(self, path: Path, metadata: dict[str, Any]) -> None:
+        """
+        Save metadata as JSON file.
+
+        Args:
+            path: Path to save metadata
+            metadata: Metadata dictionary
+        """
+        # Add timestamp
+        metadata['saved_at'] = datetime.now().isoformat()
+
+        # Convert Path objects to strings
+        metadata_serializable = {}
+        for key, value in metadata.items():
+            if isinstance(value, Path):
+                metadata_serializable[key] = str(value)
+            elif isinstance(value, (int, float, str, bool, list, dict)):
+                metadata_serializable[key] = value
+            else:
+                metadata_serializable[key] = str(value)
+
+        with open(path, 'w') as f:
+            json.dump(metadata_serializable, f, indent=2)
+
+    def get_best_checkpoint_metadata(self) -> dict[str, Any] | None:
+        """
+        Get metadata for the best checkpoint.
+
+        Returns:
+            Metadata dictionary or None if no best checkpoint exists
+        """
+        if not self.best_scores:
+            return None
+
+        best_loss, best_path = self.best_scores[0]
+        return {
+            'checkpoint_path': str(best_path),
+            'loss': best_loss,
+        }
 
     def load_checkpoint(
         self,

@@ -24,7 +24,6 @@ class ImageRestorationDataset(Dataset):
         degradation_fn: Callable[[torch.Tensor], torch.Tensor],
         transform: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
         extensions: tuple[str, ...] = (".jpg", ".jpeg", ".png", ".bmp", ".webp"),
-        upscale_factor: int = 1,  # For super-resolution tasks
         limit: int | None = None,
     ) -> None:
         """
@@ -32,19 +31,16 @@ class ImageRestorationDataset(Dataset):
 
         Args:
             root_dir: Root directory containing images (searched recursively)
-            target_size: Target high-resolution size (height, width) for the output
-            degradation_fn: Function to degrade high-quality images
+            target_size: Target size (height, width) for both input and target
+            degradation_fn: Function to degrade high-quality images (same size in/out)
             transform: Optional additional transforms after degradation
             extensions: Valid image file extensions
-            upscale_factor: Upscale factor for super-resolution (1 for other tasks)
-                          If > 1, images will be loaded at target_size, which becomes the HR target,
-                          and degradation creates LR input at target_size / upscale_factor
+            limit: Maximum number of images to load (None = all)
         """
         self.root_dir = Path(root_dir)
         self.target_size = target_size
         self.degradation_fn = degradation_fn
         self.transform = transform
-        self.upscale_factor = upscale_factor
 
         # Find all image files recursively
         self.image_paths = sorted([
